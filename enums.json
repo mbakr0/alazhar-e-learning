@@ -1,0 +1,47 @@
+[
+    {
+      "enum_name": "common_sub_level",
+      "enum_value": "المستوى الأول"
+    },
+    {
+      "enum_name": "common_sub_level",
+      "enum_value": "المستوى الثاني"
+    },
+    {
+      "enum_name": "common_sub_level",
+      "enum_value": "المستوى الثالث"
+    },
+    {
+      "enum_name": "common_sub_level",
+      "enum_value": "المستوى الرابع"
+    },
+
+    {
+      "enum_name": "main_academic_level",
+      "enum_value": "التمهيدية"
+    },
+    {
+      "enum_name": "main_academic_level",
+      "enum_value": "المتوسطة"
+    },
+    {
+      "enum_name": "main_academic_level",
+      "enum_value": "التخصصية"
+    },
+    {
+      "enum_name": "specialized_sub_level",
+      "enum_value": "العقيدة"
+    },
+    {
+      "enum_name": "specialized_sub_level",
+      "enum_value": "التفسير والحديث"
+    },
+    {
+      "enum_name": "specialized_sub_level",
+      "enum_value": "الفقه وأصوله"
+    },
+    {
+      "enum_name": "specialized_sub_level",
+      "enum_value": "اللغة العربية"
+    }
+  ]

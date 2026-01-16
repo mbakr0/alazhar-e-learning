@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+requests
+gunicorn
+python-dotenv
+google-api-python-client
+psycopg2
+fastapi_limiter
+redis 
+rq
