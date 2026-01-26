@@ -25,13 +25,12 @@ async def root_api():
 )
 async def add_videos(videos: List[VideoInfo]):
     try:
-        job = video_queue.enqueue(process_videos, [v.model_dump for v in videos])
+        job = video_queue.enqueue(process_videos, videos)
         return SuccessResponse(
             success=True,
             message="Videos queued for insertion",
             data={
                 "job_id": job.get_id()
-
             }
         )
     except Exception as e:

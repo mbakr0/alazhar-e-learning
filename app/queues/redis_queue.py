@@ -1,4 +1,4 @@
-import redis.asyncio as redis
+import redis
 from rq import Queue
 from app.core.config import REDIS_URL
 

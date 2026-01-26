@@ -2,10 +2,13 @@ from typing import List
 
 from psycopg2.extras import execute_values, RealDictCursor
 
+from typing import Optional
+from uuid import UUID
+from datetime import datetime
 from app.db.connection import db_pool
 from app.domain.youtube import YouTubeVideo
 from app.schemas.video_info import VideoInfo
-from app.domain.models import SuggestionVideo
+from app.domain.models import SuggestionVideo, titleSuggestions, descriptionSuggestions
 
 
 # -------------------------------------------------------------------
@@ -171,9 +174,189 @@ def insert_youtube_videos(videos: List[YouTubeVideo]) -> None:
 def get_videos_count() -> int:
     conn = db_pool.getconn()
     try:
-        with conn.curser() as cur:
+        with conn.cursor() as cur:
             cur.execute("SELECT COUNT(*) FROM video_info")
             count = cur.fetchone()[0]
             return count
+    finally:
+        db_pool.putconn(conn)
+
+
+# -------------------------------------------------------------------
+# Title Suggestions Operations
+# -------------------------------------------------------------------
+
+def create_title_suggestion(video_id: str, title_text: str) -> titleSuggestions:
+    """Create a new title suggestion."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                """
+                INSERT INTO title_suggestions (video_id, title_text, approval_count)
+                VALUES (%s, %s, 0)
+                RETURNING id, video_id, title_text, approval_count, created_at
+                """,
+                (video_id, title_text)
+            )
+            row = cur.fetchone()
+            conn.commit()
+            return titleSuggestions(**row)
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        db_pool.putconn(conn)
+
+
+def get_title_suggestions_by_video(video_id: str) -> List[titleSuggestions]:
+    """Get all title suggestions for a video."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT id, video_id, title_text, approval_count, created_at
+                FROM title_suggestions
+                WHERE video_id = %s
+                ORDER BY approval_count DESC, created_at DESC
+                """,
+                (video_id,)
+            )
+            rows = cur.fetchall()
+            return [titleSuggestions(**row) for row in rows]
+    finally:
+        db_pool.putconn(conn)
+
+
+def vote_title_suggestion(title_suggestion_id: UUID, voter_hash: str) -> bool:
+    """Vote on a title suggestion. Returns True if vote was added, False if already voted."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            # Check if already voted
+            cur.execute(
+                """
+                SELECT id FROM title_votes
+                WHERE title_suggestion_id = %s AND voter_hash = %s
+                """,
+                (title_suggestion_id, voter_hash)
+            )
+            if cur.fetchone():
+                return False
+            
+            # Add vote
+            cur.execute(
+                """
+                INSERT INTO title_votes (title_suggestion_id, voter_hash)
+                VALUES (%s, %s)
+                """,
+                (title_suggestion_id, voter_hash)
+            )
+            
+            # Update approval count
+            cur.execute(
+                """
+                UPDATE title_suggestions
+                SET approval_count = approval_count + 1
+                WHERE id = %s
+                """,
+                (title_suggestion_id,)
+            )
+            conn.commit()
+            return True
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        db_pool.putconn(conn)
+
+
+# -------------------------------------------------------------------
+# Description Suggestions Operations
+# -------------------------------------------------------------------
+
+def create_description_suggestion(video_id: str, description_text: str) -> descriptionSuggestions:
+    """Create a new description suggestion."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                """
+                INSERT INTO description_suggestions (video_id, description_text, approval_count)
+                VALUES (%s, %s, 0)
+                RETURNING id, video_id, description_text, approval_count, created_at
+                """,
+                (video_id, description_text)
+            )
+            row = cur.fetchone()
+            conn.commit()
+            return descriptionSuggestions(**row)
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        db_pool.putconn(conn)
+
+
+def get_description_suggestions_by_video(video_id: str) -> List[descriptionSuggestions]:
+    """Get all description suggestions for a video."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT id, video_id, description_text, approval_count, created_at
+                FROM description_suggestions
+                WHERE video_id = %s
+                ORDER BY approval_count DESC, created_at DESC
+                """,
+                (video_id,)
+            )
+            rows = cur.fetchall()
+            return [descriptionSuggestions(**row) for row in rows]
+    finally:
+        db_pool.putconn(conn)
+
+
+def vote_description_suggestion(description_suggestion_id: UUID, voter_hash: str) -> bool:
+    """Vote on a description suggestion. Returns True if vote was added, False if already voted."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            # Check if already voted
+            cur.execute(
+                """
+                SELECT id FROM description_votes
+                WHERE description_suggestion_id = %s AND voter_hash = %s
+                """,
+                (description_suggestion_id, voter_hash)
+            )
+            if cur.fetchone():
+                return False
+            
+            # Add vote
+            cur.execute(
+                """
+                INSERT INTO description_votes (description_suggestion_id, voter_hash)
+                VALUES (%s, %s)
+                """,
+                (description_suggestion_id, voter_hash)
+            )
+            
+            # Update approval count
+            cur.execute(
+                """
+                UPDATE description_suggestions
+                SET approval_count = approval_count + 1
+                WHERE id = %s
+                """,
+                (description_suggestion_id,)
+            )
+            conn.commit()
+            return True
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         db_pool.putconn(conn)

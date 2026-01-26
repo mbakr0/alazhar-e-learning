@@ -6,7 +6,6 @@ from app.schemas.video_info import VideoInfo
 
 def suggestion_to_video_info(s: SuggestionVideo) -> VideoInfo:
     """Convert this dataclass to a Pydantic VideoInfo model"""
-    print(s)
     return VideoInfo(
         video_id=s.video_id,
         main_level=MainAcademicLevel(s.main_level) if s.main_level else None,

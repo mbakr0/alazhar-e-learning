@@ -94,3 +94,25 @@ class descriptionVotes:
         "voter_hash",
         "created_at"
     ]
+
+@dataclass
+class SuggestionVideo:
+    video_id: str | None = None
+    main_level: str | None = None
+    common_sub_level: str | None = None
+    specialized_level: str | None = None
+    lecture_title: str | None = None
+    lesson_name: str | None = None
+    batch: datetime | None = None
+    is_related_video: bool | None = None
+    
+    columns: ClassVar[list[str]] = [
+        "video_id",
+        "main_level",
+        "common_sub_level",
+        "specialized_level",
+        "lecture_title",
+        "lesson_name",
+        "batch",
+        "is_related_video"
+    ]

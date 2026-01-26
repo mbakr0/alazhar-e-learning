@@ -1,15 +1,17 @@
-from fastapi import HTTPException
 import googleapiclient.discovery
-from core.config import YOUTUBE_API_KEY, PLAYLIST_ID, CHANNEL_ID
+from app.core.config import YOUTUBE_API_KEY, PLAYLIST_ID, CHANNEL_ID
 
 def get_youtube_client():
+    if not YOUTUBE_API_KEY:
+        raise ValueError("YOUTUBE_API_KEY not set")
     return googleapiclient.discovery.build(
         "youtube", "v3", developerKey=YOUTUBE_API_KEY
     )
 
 def get_channel_videos():
+    """Fetch all videos from the YouTube channel playlist."""
     if not YOUTUBE_API_KEY:
-        raise HTTPException(status_code=500, detail="API key not set")
+        raise ValueError("YOUTUBE_API_KEY not set")
     try:
         youtube = get_youtube_client()
         next_page_token = None
@@ -39,21 +41,25 @@ def get_channel_videos():
                 break
         return videos
     except googleapiclient.errors.HttpError as e:
-        raise HTTPException(status_code=e.resp.status,detail=str(e))
+        raise Exception(f"YouTube API error: {e}")
 
 
      
 def get_channel_video_count():
+    """Get the total video count from the YouTube channel."""
     if not YOUTUBE_API_KEY:
-        raise HTTPException(status_code=500, detail="API key not set")
+        raise ValueError("YOUTUBE_API_KEY not set")
     try:
         youtube = get_youtube_client()
         response = youtube.channels().list(
             part="statistics",
-            id=CHANNEL_ID  # You need to get the channel ID
+            id=CHANNEL_ID
         ).execute()
+        
+        if not response.get("items"):
+            raise ValueError(f"Channel with ID {CHANNEL_ID} not found")
         
         count = int(response["items"][0]["statistics"]["videoCount"])
         return count
     except googleapiclient.errors.HttpError as e:
-        raise HTTPException(status_code=e.resp.status, detail=str(e))
+        raise Exception(f"YouTube API error: {e}")

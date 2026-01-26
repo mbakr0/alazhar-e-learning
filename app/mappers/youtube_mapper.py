@@ -1,4 +1,4 @@
-from domain.youtube import YouTubeVideo
+from app.domain.youtube import YouTubeVideo
 
 def parse_youtube_item(item) -> YouTubeVideo:
     snippet = item["snippet"]
