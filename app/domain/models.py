@@ -95,6 +95,46 @@ class descriptionVotes:
         "created_at"
     ]
 
+
+@dataclass
+class lessonNameSuggestions:
+    id: uuid.UUID | None = None
+    video_id: str | None = None
+    lesson_name_text: str | None = None
+    approval_count: int | None = None
+    created_at: datetime | None = None
+
+    columns: ClassVar[list[str]] = [
+        "id", "video_id", "lesson_name_text", "approval_count", "created_at"
+    ]
+
+
+@dataclass
+class lecturerSuggestions:
+    id: uuid.UUID | None = None
+    video_id: str | None = None
+    lecturer_name_text: str | None = None
+    approval_count: int | None = None
+    created_at: datetime | None = None
+
+    columns: ClassVar[list[str]] = [
+        "id", "video_id", "lecturer_name_text", "approval_count", "created_at"
+    ]
+
+
+@dataclass
+class relatedSuggestion:
+    id: uuid.UUID | None = None
+    video_id: str | None = None
+    is_related: bool | None = None
+    approval_count: int | None = None
+    created_at: datetime | None = None
+
+    columns: ClassVar[list[str]] = [
+        "id", "video_id", "is_related", "approval_count", "created_at"
+    ]
+
+
 @dataclass
 class SuggestionVideo:
     video_id: str | None = None

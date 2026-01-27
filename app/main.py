@@ -17,7 +17,8 @@ import redis.asyncio as async_redis
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     def run_worker():
-        subprocess.call(["rq", "worker", "video_queue"])
+        # Process both video jobs (internal) and suggestion/vote jobs (user writes via queue)
+        subprocess.call(["rq", "worker", "video_queue", "suggestions_queue"])
 
     worker_thread = threading.Thread(
         target=run_worker,
